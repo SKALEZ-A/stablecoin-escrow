@@ -1,6 +1,6 @@
-// Contract addresses - updated after deployment
+// Contract addresses - updated for testing with mock USDC
 export const ESCROW_CONTRACT = {
-  address: '0xF8c217E22F6e5571AbE6353Aa920Ba307BB131c0' as `0x${string}`, // Base Sepolia testnet
+  address: '0x3bbB8Ee519D500234D69b9ECC357B63CB52a97D7' as `0x${string}`, // Test Escrow with Mock USDC
   abi: [
     {
       "inputs": [

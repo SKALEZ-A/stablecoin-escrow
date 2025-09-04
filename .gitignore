@@ -1,1 +1,4 @@
 node_modules
+DEPLOYMENT_GUIDE.md
+.env
+DEPLOYMENT_SUMMARY.md

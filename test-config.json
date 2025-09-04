@@ -1,0 +1,7 @@
+{
+  "network": "baseSepolia",
+  "mockUSDC": "0xFBf0Bed408AD8F39F9f0899835064E84Dfddd3Cf",
+  "testEscrow": "0x3bbB8Ee519D500234D69b9ECC357B63CB52a97D7",
+  "deployer": "0x5230b89d6728a10b34b8EC1C740a7A7a1C4afe94",
+  "timestamp": "2025-09-04T08:30:00.000Z"
+}
