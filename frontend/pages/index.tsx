@@ -4,6 +4,7 @@ import { useAccount } from 'wagmi'
 import ListItem from '../components/ListItem'
 import BuyItem from '../components/BuyItem'
 import ItemList from '../components/ItemList'
+import MintUSDC from '../components/MintUSDC'
 
 export default function Home() {
   const { isConnected } = useAccount()
@@ -37,6 +38,9 @@ export default function Home() {
           </div>
         ) : (
           <div className="space-y-8">
+            {/* Mint USDC for Testing */}
+            <MintUSDC />
+            
             {/* Tab Navigation */}
             <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-md">
               <button

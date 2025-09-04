@@ -86,7 +86,7 @@ export const ESCROW_CONTRACT = {
 } as const
 
 export const USDC_CONTRACT = {
-  address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as `0x${string}`, // Base Sepolia USDC
+  address: '0xFBf0Bed408AD8F39F9f0899835064E84Dfddd3Cf' as `0x${string}`, // Mock USDC for testing
   abi: [
     {
       "inputs": [
@@ -102,6 +102,23 @@ export const USDC_CONTRACT = {
       "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
       "name": "balanceOf",
       "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {"internalType": "address", "name": "to", "type": "address"},
+        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+      ],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
       "stateMutability": "view",
       "type": "function"
     }
