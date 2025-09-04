@@ -107,5 +107,8 @@ Thumbs.db
 DEPLOYMENT_GUIDE.md
 DEPLOYMENT_SUMMARY.md
 COMPLETE_TESTING_INSTRUCTIONS.md
+
+# Kiro settings with API keys
+.kiro/settings/mcp.json
 .kiro
 .vscode
