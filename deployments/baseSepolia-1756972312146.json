@@ -1,0 +1,18 @@
+{
+  "network": "baseSepolia",
+  "contractAddress": "0xF8c217E22F6e5571AbE6353Aa920Ba307BB131c0",
+  "deployer": "0x5230b89d6728a10b34b8EC1C740a7A7a1C4afe94",
+  "timestamp": "2025-09-04T07:51:52.146Z",
+  "constructorArgs": [
+    "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    1000,
+    "0x5230b89d6728a10b34b8EC1C740a7A7a1C4afe94"
+  ],
+  "gasUsed": "TBD",
+  "transactionHash": "0x510e3fbde75c15d772ba0456cb483728cf3183dcda0cdbeac7091d4ca0fefda1",
+  "networkConfig": {
+    "adminAddress": "0x5230b89d6728a10b34b8EC1C740a7A7a1C4afe94",
+    "platformFeePercent": 1000,
+    "usdcAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+  }
+}
