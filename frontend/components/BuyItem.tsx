@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
-import { parseUnits, formatUnits } from 'viem'
-import { ESCROW_CONTRACT, USDC_CONTRACT } from '../lib/contracts'
+import { useReadContract } from 'wagmi'
+import { formatUnits } from 'viem'
+import { ESCROW_CONTRACT } from '../lib/contracts'
+import { PurchaseCheckout } from './forms'
 
 export default function BuyItem() {
   const [itemId, setItemId] = useState('')
-  
-  const { writeContract, data: hash, isPending } = useWriteContract()
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
-    hash,
-  })
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [completedPurchase, setCompletedPurchase] = useState<{
+    itemId: string
+    transactionHash: string
+  } | null>(null)
 
   // Read item details
   const { data: itemData } = useReadContract({
@@ -25,48 +26,99 @@ export default function BuyItem() {
     args: itemData ? [itemData[1]] : undefined, // itemData[1] is price
   })
 
-  const handleApproveAndBuy = async () => {
-    if (!itemId || !itemData) {
-      alert('Please enter a valid item ID')
+  const handleProceedToCheckout = () => {
+    if (!itemData || !feeData) {
+      alert('Please enter a valid item ID and wait for data to load')
       return
     }
-
-    try {
-      const price = itemData[1] as bigint
-      
-      // First approve USDC spending
-      writeContract({
-        ...USDC_CONTRACT,
-        functionName: 'approve',
-        args: [ESCROW_CONTRACT.address, price],
-      })
-      
-      // Note: In a real app, you'd wait for approval then call buyItem
-      // For simplicity, we're showing the approve step here
-    } catch (error) {
-      console.error('Error:', error)
-      alert('Error processing transaction. Please try again.')
-    }
+    setShowCheckout(true)
   }
 
-  const handleBuyItem = async () => {
-    if (!itemId) {
-      alert('Please enter a valid item ID')
-      return
-    }
-
-    try {
-      writeContract({
-        ...ESCROW_CONTRACT,
-        functionName: 'buyItem',
-        args: [BigInt(itemId)],
-      })
-    } catch (error) {
-      console.error('Error buying item:', error)
-      alert('Error buying item. Please try again.')
-    }
+  const handlePurchaseComplete = (transactionHash: string) => {
+    console.log('Purchase completed:', { itemId, transactionHash })
+    setCompletedPurchase({ itemId, transactionHash })
+    setShowCheckout(false)
+    
+    // Reset after showing success for a while
+    setTimeout(() => {
+      setCompletedPurchase(null)
+      setItemId('')
+    }, 5000)
   }
 
+  const handlePurchaseCancel = () => {
+    setShowCheckout(false)
+  }
+
+  const handleStartNewPurchase = () => {
+    setCompletedPurchase(null)
+    setItemId('')
+  }
+
+  // Show purchase success screen
+  if (completedPurchase) {
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+        <div className="mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Purchase Successful!</h2>
+          <p className="text-gray-600 mb-4">
+            You have successfully purchased item #{completedPurchase.itemId}.
+          </p>
+          
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-800 text-sm mb-2">
+              <strong>Transaction Hash:</strong>
+            </p>
+            <a 
+              href={`https://basescan.org/tx/${completedPurchase.transactionHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-600 hover:text-green-800 underline text-sm break-all"
+            >
+              {completedPurchase.transactionHash}
+            </a>
+          </div>
+          
+          <div className="space-y-3">
+            <button
+              onClick={handleStartNewPurchase}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Buy Another Item
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show enhanced checkout
+  if (showCheckout && itemData && feeData) {
+    return (
+      <PurchaseCheckout
+        itemId={itemId}
+        itemData={{
+          title: itemData[2] as string,
+          price: itemData[1] as bigint,
+          creator: itemData[0] as string,
+          active: itemData[3] as boolean
+        }}
+        feeData={{
+          platformFee: feeData[0] as bigint,
+          creatorPayout: feeData[1] as bigint
+        }}
+        onComplete={handlePurchaseComplete}
+        onCancel={handlePurchaseCancel}
+      />
+    )
+  }
+
+  // Show item selection form
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <h2 className="text-2xl font-semibold mb-6">Buy Item</h2>
@@ -98,45 +150,30 @@ export default function BuyItem() {
               <div className="mt-3 pt-3 border-t">
                 <p><strong>Platform Fee:</strong> {formatUnits(feeData[0], 6)} USDC</p>
                 <p><strong>Creator Gets:</strong> {formatUnits(feeData[1], 6)} USDC</p>
+                <p><strong>Total Cost:</strong> {formatUnits(itemData[1], 6)} USDC</p>
               </div>
             )}
           </div>
         )}
 
-        <div className="space-y-2">
-          <button
-            onClick={handleApproveAndBuy}
-            disabled={!itemData || isPending || isConfirming}
-            className="w-full bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            1. Approve USDC Spending
-          </button>
-          
-          <button
-            onClick={handleBuyItem}
-            disabled={!itemData || isPending || isConfirming}
-            className="w-full bg-base-blue text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            2. Buy Item
-          </button>
-        </div>
-      </div>
+        <button
+          onClick={handleProceedToCheckout}
+          disabled={!itemData || !feeData || !(itemData[3] as boolean)}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {!itemData ? 'Enter Item ID' : 
+           !(itemData[3] as boolean) ? 'Item Not Available' : 
+           'Proceed to Checkout'}
+        </button>
 
-      {hash && (
-        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-green-800 text-sm">
-            ✅ Transaction submitted! 
-            <a 
-              href={`https://basescan.org/tx/${hash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-1 underline"
-            >
-              View transaction
-            </a>
-          </p>
-        </div>
-      )}
+        {itemData && !(itemData[3] as boolean) && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-800 text-sm">
+              ⚠️ This item is no longer available for purchase.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
